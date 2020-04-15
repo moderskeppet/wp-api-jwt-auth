@@ -137,9 +137,11 @@ class Jwt_Auth_Public
         $issuedAt = time();
         $notBefore = apply_filters('jwt_auth_not_before', $issuedAt, $issuedAt);
         $expire = apply_filters('jwt_auth_expire', $issuedAt + (DAY_IN_SECONDS * 7), $issuedAt);
+        // MOD BY FM 2020-04
+        $iss = str_replace('/wp-json/','',MS_API_URL);
 
         $token = array(
-            'iss' => get_bloginfo('url'),
+            'iss' => $iss,
             'iat' => $issuedAt,
             'nbf' => $notBefore,
             'exp' => $expire,
@@ -274,7 +276,9 @@ class Jwt_Auth_Public
         try {
             $token = JWT::decode($token, $secret_key, array('HS256'));
             /** The Token is decoded now validate the iss */
-            if ($token->iss != get_bloginfo('url')) {
+            // MOD BY FM 2020-04
+            $iss = str_replace('/wp-json/','',MS_API_URL);
+            if ($token->iss != $iss) {
                 /** The iss do not match, return error */
                 return new WP_Error(
                     'jwt_auth_bad_iss',
